@@ -12,19 +12,49 @@ of you in Neovim before they land.
   chat call the Claude API with it, on your account.
 - Claude Code, for the edit review.
 
+With [Homebrew](https://brew.sh):
+
+```sh
+brew install neovim tmux ripgrep fd
+brew install --cask ghostty
+```
+
+`git`, `curl` and `python3` come with Apple's command line tools (`xcode-select --install`).
+
 ## Install
+
+Move your current configs aside first; `install.sh` skips any path that exists:
+
+```sh
+for name in nvim tmux ghostty; do
+  [ -e ~/.config/$name ] && mv ~/.config/$name ~/.config/$name.bak
+done
+```
 
 ```sh
 git clone https://github.com/kareempaes/dotfiles ~/development/dotfiles
 ~/development/dotfiles/install.sh
 ```
 
-`install.sh` symlinks `nvim`, `tmux` and `ghostty` into `~/.config` and the two hooks into `~/.claude/hooks`. It skips
-anything that already exists, so move your own config aside first. The first `nvim` start installs the plugins at the
-commits pinned in `nvim/lazy-lock.json`.
+`install.sh` symlinks `nvim`, `tmux` and `ghostty` into `~/.config` and the two hooks into `~/.claude/hooks`. The first
+`nvim` start installs the plugins at the commits pinned in `nvim/lazy-lock.json`; if you used Neovim before, moving
+`~/.local/share/nvim` aside as well gives them a clean start.
 
 Ghostty also reads `~/Library/Application Support/com.mitchellh.ghostty/config.ghostty` after this config; leave that
 file empty.
+
+## Update and remove
+
+The symlinks point into the clone, so `git pull` there updates everything: restart Neovim and Ghostty, and reload
+tmux with `C-a r`.
+
+To remove it, delete the links (the clone is untouched) and move your `.bak` configs back:
+
+```sh
+rm ~/.config/nvim ~/.config/tmux ~/.config/ghostty ~/.claude/hooks/review.py ~/.claude/hooks/typein.sh
+```
+
+If you set up the edit review, also take its two entries out of `~/.claude/settings.json`.
 
 ## Reviewing Claude Code's edits in Neovim
 
