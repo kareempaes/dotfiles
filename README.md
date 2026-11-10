@@ -44,8 +44,8 @@ Everything else is shared. The first `nvim` start installs the plugins at the co
 
 Also needed:
 
-- `ANTHROPIC_API_KEY` exported in the shell that starts Neovim. Completions (minuet), `<leader>ak` and the review side
-  chat call the Claude API with it, on your account.
+- `ANTHROPIC_API_KEY` exported in the shell that starts Neovim. `<leader>ak` and the review side chat call the Claude
+  API with it, on your account.
 - Claude Code, for the edit review.
 - Optional: Neovim downloads its language servers and formatters by itself on first start, and many of them need Node
   or Go to install; `<leader>gg` opens `lazygit`. The editor works without all three (`brew install node go lazygit`
@@ -111,4 +111,3 @@ Neovim, on top of LazyVim's defaults (`nvim/lua/config/keymaps.lua`); Option is 
 | Option+/, Option+. | toggle comment, code action |
 | Option+: | command palette |
 | Option+` | terminal |
-| Option+Shift+A, Option+A | accept a completion: all of it, one line |

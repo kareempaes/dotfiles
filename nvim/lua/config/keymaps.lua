@@ -88,11 +88,10 @@ end
 -- last change and Option+o open a line. Not on Option: b/f (what Option+Left/Right send), j/k
 -- (move line), n (next reference; plugins/lsp.lua frees p), and Shift+O, Shift+P, [, ], \,
 -- which send the Esc-O, Esc-P, Esc-[... that open terminal control sequences. Option+: has two
--- names, like the brackets. Cmd+P and Cmd+B go on Option+P and Option+E in Normal mode only:
--- minuet owns them in Insert.
-map("n", "<M-p>", "<leader><space>", { remap = true, desc = "Find Files (Root Dir)" })
-map("n", "<M-e>", "<leader>e", { remap = true, desc = "Explorer Snacks (root dir)" })
+-- names, like the brackets.
 for _, chord in ipairs({
+  { "<M-p>", "<leader><space>", "Find Files (Root Dir)" }, -- Cmd+P
+  { "<M-e>", "<leader>e", "Explorer Snacks (root dir)" }, -- Cmd+B
   { "<M-:>", "<leader>sC", "Commands" }, -- Cmd+Shift+P
   { "<M-S-;>", "<leader>sC", "Commands" },
   { "<M-w>", "<leader>bd", "Delete Buffer" }, -- Cmd+W
