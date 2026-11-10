@@ -1,0 +1,20 @@
+# OS Junk
+.DS_Store
+Thumbs.db
+
+# Local tool state
+__pycache__/
+.claude/
+
+# Neovim / LazyVim local data
+nvim/state/
+nvim/swap/
+nvim/undo/
+nvim/plugin/
+
+# Tmux local plugins (if using TPM)
+tmux/plugins/*
+!tmux/plugins/tpm
+
+# Go server build output
+/server/bin/
