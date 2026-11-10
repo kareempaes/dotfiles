@@ -1,37 +1,11 @@
 # dotfiles
 
-My Neovim (LazyVim), tmux and Ghostty configs for macOS, plus two Claude Code hooks that put Claude's edits in front
-of you in Neovim before they land.
-
-## Requirements
-
-- macOS: tmux yanks through `pbcopy`, the review hook pings with `afplay`, and Ghostty turns Option into Alt.
-- Ghostty, tmux and Neovim 0.12.
-- `git`, `curl`, `python3`, `ripgrep` and `fd` on `PATH`.
-- `ANTHROPIC_API_KEY` exported in the shell that starts Neovim. Completions (minuet), `<leader>ak` and the review side
-  chat call the Claude API with it, on your account.
-- Claude Code, for the edit review.
-
-With [Homebrew](https://brew.sh):
-
-```sh
-brew install neovim tmux ripgrep fd
-brew install --cask ghostty
-```
-
-`git`, `curl`, `python3` and the C compiler that builds the syntax parsers come with Apple's command line tools
-(`xcode-select --install`).
-
-Optional: Neovim downloads its language servers and formatters by itself on first start, and many of them need Node
-or Go to install; `<leader>gg` opens `lazygit`. The editor works without all three.
-
-```sh
-brew install node go lazygit
-```
+My Neovim (LazyVim), tmux and Ghostty configs for macOS and Linux, plus two Claude Code hooks that put Claude's edits
+in front of you in Neovim before they land.
 
 ## Install
 
-Move your current configs aside first; `install.sh` skips any path that exists:
+Move your current configs aside first; nothing that exists is replaced:
 
 ```sh
 for name in nvim tmux ghostty; do
@@ -39,17 +13,46 @@ for name in nvim tmux ghostty; do
 done
 ```
 
+Clone, then run the target for your system. It installs the programs and links the configs:
+
 ```sh
 git clone https://github.com/kareempaes/dotfiles ~/development/dotfiles
-~/development/dotfiles/install.sh
+cd ~/development/dotfiles
+make macos    # or: make linux
 ```
 
-`install.sh` symlinks `nvim`, `tmux` and `ghostty` into `~/.config` and the two hooks into `~/.claude/hooks`. The first
-`nvim` start installs the plugins at the commits pinned in `nvim/lazy-lock.json`; if you used Neovim before, moving
-`~/.local/share/nvim` aside as well gives them a clean start.
+**`make macos`** needs [Homebrew](https://brew.sh) and Apple's command line tools (`xcode-select --install`). It
+installs Neovim, tmux, ripgrep, fd and Ghostty with `brew`.
 
-Ghostty also reads `~/Library/Application Support/com.mitchellh.ghostty/config.ghostty` after this config; leave that
-file empty.
+**`make linux`** is for Linux Mint and Ubuntu on X11, and needs `sudo apt install git make` first. It asks for your
+password and installs tmux, ripgrep, fd, xclip, a C compiler and a sound player with `apt`, then Neovim's own build
+into `/opt` (linked as `/usr/local/bin/nvim`), because the one in `apt` is too old. Ghostty is installed only where
+`apt` has it (Ubuntu 26.04 and later); otherwise see [its install page](https://ghostty.org/docs/install/binary), or
+use tmux and Neovim in the terminal you have. This target is new and has not been run on a real machine yet.
+
+Both end with `./install.sh macos` or `./install.sh linux`, which you can run alone when the programs are already
+there. It symlinks `nvim`, `tmux` and `ghostty` into `~/.config` and the two hooks into `~/.claude/hooks`, and links
+that system's own files as `tmux/os.conf` and `ghostty/os`:
+
+| | macOS | Linux |
+| --- | --- | --- |
+| `tmux/macos.conf`, `tmux/linux.conf` | `y` yanks to `pbcopy` | `y` yanks to `xclip` |
+| `ghostty/macos`, `ghostty/linux` | Option sends Alt; `Cmd+,` opens the config | `Ctrl+,` opens the config |
+
+Everything else is shared. The first `nvim` start installs the plugins at the commits pinned in
+`nvim/lazy-lock.json`; if you used Neovim before, moving `~/.local/share/nvim` aside as well gives them a clean start.
+
+Also needed:
+
+- `ANTHROPIC_API_KEY` exported in the shell that starts Neovim. Completions (minuet), `<leader>ak` and the review side
+  chat call the Claude API with it, on your account.
+- Claude Code, for the edit review.
+- Optional: Neovim downloads its language servers and formatters by itself on first start, and many of them need Node
+  or Go to install; `<leader>gg` opens `lazygit`. The editor works without all three (`brew install node go lazygit`
+  on macOS).
+
+On macOS, Ghostty also reads `~/Library/Application Support/com.mitchellh.ghostty/config.ghostty` after this config;
+leave that file empty.
 
 ## Update and remove
 
@@ -91,9 +94,9 @@ change the selected lines and shows the result through the same review.
 tmux (prefix `C-a`): `|` and `-` split in the current directory, `h` `j` `k` `l` move between panes, `H` `J` `K` `L`
 resize, `r` reloads the config; copy mode uses vi keys (`v` selects, `y` yanks to the clipboard).
 
-Ghostty: `Cmd+,` opens its config in Neovim.
+Ghostty: `Cmd+,` (macOS) or `Ctrl+,` (Linux) opens its config in Neovim.
 
-Neovim, on top of LazyVim's defaults (`nvim/lua/config/keymaps.lua`):
+Neovim, on top of LazyVim's defaults (`nvim/lua/config/keymaps.lua`); Option is Alt on Linux:
 
 | Key | Action |
 | --- | --- |

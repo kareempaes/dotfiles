@@ -1,0 +1,4 @@
+# Linux: install.sh links this as `os`, which `config` includes. Alt already sends Alt here.
+
+# Open the config in Neovim, on the key of the stock open_config action.
+keybind = ctrl+,=text:nvim ~/.config/ghostty/config\r

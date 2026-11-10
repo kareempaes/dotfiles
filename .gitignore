@@ -6,6 +6,10 @@ Thumbs.db
 __pycache__/
 .claude/
 
+# Which system's files are in use: links made by install.sh
+/tmux/os.conf
+/ghostty/os
+
 # Neovim / LazyVim local data
 nvim/state/
 nvim/swap/

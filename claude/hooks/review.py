@@ -23,6 +23,11 @@ from functools import partial
 LOG = os.path.expanduser("~/.local/state/claude-review/review.jsonl")
 LOCKFILES = {"lazy-lock.json", "go.sum", "package-lock.json", "pnpm-lock.yaml"}
 GENERATED = re.compile(r"Code generated .* DO NOT EDIT|@generated")
+# Neovim's own rule for its server sockets: in $XDG_RUNTIME_DIR where that is set (Linux), else under $TMPDIR (macOS)
+SOCKETS = (os.path.join(os.environ["XDG_RUNTIME_DIR"], "nvim.*.0") if os.environ.get("XDG_RUNTIME_DIR")
+           else os.path.join(os.environ.get("TMPDIR", "/tmp"), "nvim.*/*/nvim.*.0"))
+PING = (["afplay", "/System/Library/Sounds/Ping.aiff"] if sys.platform == "darwin"
+        else ["paplay", "/usr/share/sounds/freedesktop/stereo/message.oga"])
 
 
 def log(event, **kw):
@@ -96,7 +101,7 @@ def proposed(tool, inp, path):
 
 def socket_for(path):
     best, depth = None, -1
-    for s in glob.glob(os.path.join(os.environ.get("TMPDIR", "/tmp"), "nvim.*/*/nvim.*.0")):
+    for s in glob.glob(SOCKETS):
         try:
             cwd = os.path.realpath(nvim(s, "getcwd()"))
         except Exception:  # a dead socket is skipped
@@ -187,8 +192,11 @@ def main():
         # Detached from our stdio: a child holding the stdout pipe open past our
         # exit makes Claude Code see the verdict without an end-of-stream and
         # refuse it ("stdio went quiet before end-of-stream").
-        subprocess.Popen(["afplay", "/System/Library/Sounds/Ping.aiff"], stdin=subprocess.DEVNULL,
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+        try:
+            subprocess.Popen(PING, stdin=subprocess.DEVNULL,
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+        except OSError:  # no player on this system: the review is drawn all the same
+            pass
         while os.path.exists(sock):
             if os.path.exists(result):
                 with open(result) as f:

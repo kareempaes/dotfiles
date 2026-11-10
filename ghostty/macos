@@ -1,0 +1,6 @@
+# macOS: install.sh links this as `os`, which `config` includes.
+
+# Option sends Alt so tmux M- bindings and minuet Alt chords work. "left" keeps right-Option for special characters.
+macos-option-as-alt = true
+# Open the config in Neovim. The stock open_config action always uses the macOS default app.
+keybind = cmd+,=text:nvim ~/.config/ghostty/config\r

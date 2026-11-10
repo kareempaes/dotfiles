@@ -2,7 +2,8 @@
 # Asks every Neovim under $TMPDIR to reload the buffers whose files Claude Code just wrote, and logs each run.
 dir="${TMPDIR:-/tmp}"
 log="$dir/cs-typein.log"
-for s in "$dir"/nvim.*/*/nvim.*.0; do
+# Neovim's sockets: under $TMPDIR on macOS, in $XDG_RUNTIME_DIR on Linux
+for s in "$dir"/nvim.*/*/nvim.*.0 "${XDG_RUNTIME_DIR:-$dir}"/nvim.*.0; do
   [ -S "$s" ] || continue
   out=$(nvim --server "$s" --remote-expr 'luaeval("require(\"config.autocmds\").sync()")' 2>&1)
   rc=$?
