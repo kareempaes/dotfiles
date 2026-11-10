@@ -19,7 +19,15 @@ brew install neovim tmux ripgrep fd
 brew install --cask ghostty
 ```
 
-`git`, `curl` and `python3` come with Apple's command line tools (`xcode-select --install`).
+`git`, `curl`, `python3` and the C compiler that builds the syntax parsers come with Apple's command line tools
+(`xcode-select --install`).
+
+Optional: Neovim downloads its language servers and formatters by itself on first start, and many of them need Node
+or Go to install; `<leader>gg` opens `lazygit`. The editor works without all three.
+
+```sh
+brew install node go lazygit
+```
 
 ## Install
 
