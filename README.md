@@ -86,6 +86,12 @@ Each Edit or Write then waits, drawn inline in the buffer, until you decide:
 | `<leader>ae` | side chat that revises the proposal |
 | `<leader>aA` | toggle auto-accept ("review: auto" in the statusline) |
 
+A Bash command cannot be previewed, so its changes are reviewed right after it ran, with the same keys: each file it
+added, changed or deleted in the git repository is drawn against its state before the command, and Claude waits.
+Accepting keeps what is on disk; rejecting, whole or per hunk, writes the old text back and tells Claude. Commands
+that commit, check out or pull are not reviewed, nor are binary files; after a command that touched many files,
+`<leader>aA` then `ga` lets the rest through. For this review alone, register only the `Bash` matchers.
+
 With no Neovim open on the file's directory, edits go through Claude Code's normal flow. `<leader>ak` asks Claude to
 change the selected lines and shows the result through the same review.
 

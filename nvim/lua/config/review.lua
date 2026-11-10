@@ -2,7 +2,8 @@
 -- the change is drawn over the buffer with extmarks, the text is untouched, and the answer is written to
 -- `result` for the hook to read. Claude Code itself writes the file on accept.
 -- Each hunk has a header line with its counter and key hints; when every hunk is decided the review ends,
--- and the hook sends the accepted ones back as the edit to run.
+-- and the hook sends the accepted ones back as the edit to run. A Bash command's changes come the same way
+-- after it ran (M.propose with an old file).
 -- `<leader>ae` revises the proposal with a side chat: Sonnet answers with edits to `newfile` and the diff is
 -- redrawn. config.ask reuses all of this through M.open for a change the user asks for (no hook involved).
 local M = {}
@@ -42,6 +43,12 @@ local function clear(buf, accepted)
   end
   pending[buf] = nil
   vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+  if p.landed then -- the buffer holds the old text: read what is on disk now, and do not keep a deleted file on screen
+    vim.api.nvim_buf_call(buf, function()
+      vim.cmd("silent! edit!")
+    end)
+    accepted = accepted and vim.uv.fs_stat(vim.api.nvim_buf_get_name(buf))
+  end
   if p.float and vim.api.nvim_win_is_valid(p.float) then
     vim.api.nvim_win_close(p.float, true)
   end
@@ -457,28 +464,52 @@ end
 
 M.apply = apply
 
-function M.propose(path, newfile, result, why)
+-- With `oldfile` the change is one a Bash command already made (the hook's PostToolUse half): `newfile` is a copy
+-- of the file on disk and `oldfile` its text before the command ("" when it did not exist). The buffer is set back
+-- to the old text, so the same diff is drawn, and what the user rejects or revises is written to disk here.
+function M.propose(path, newfile, result, why, oldfile)
   local created = vim.fn.bufnr(path) == -1
   local buf = vim.fn.bufadd(path)
   vim.fn.bufload(buf)
   -- a second edit to the file replaces the first on screen, so the first is told, not left to time out unreviewed
+  -- (a landed change whose hook is gone stays as the command left it)
   local prior = pending[buf]
   if prior then
-    prior.answer("reject superseded by a newer edit to this file")
+    if not prior.landed then
+      prior.answer("reject superseded by a newer edit to this file")
+    end
     created = prior.created
   end
   clear(buf, true)
+  if oldfile and vim.bo[buf].modified then
+    return 0 -- unsaved work of the user's, not to be drawn over
+  end
   local win, prev = vim.fn.bufwinid(buf), prior and prior.prev
   if win == -1 then
     win = vim.api.nvim_get_current_win()
     prev = vim.api.nvim_win_get_buf(win)
     vim.api.nvim_win_set_buf(win, buf)
   end
+  local landed = oldfile and slurp(newfile)
+  local old = landed and oldfile ~= "" and slurp(oldfile)
+  if landed then
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, old and vim.fn.readfile(oldfile) or {})
+  end
   return start(buf, {
     answer = function(line)
+      local final = landed and (line == "accept" and slurp(newfile) or old)
+      if final ~= landed then
+        if final then
+          vim.fn.mkdir(vim.fs.dirname(path), "p")
+          spit(path, final)
+        else
+          os.remove(path)
+        end
+      end
       vim.fn.writefile({ line }, result)
     end,
     newfile = newfile,
+    landed = landed,
     win = win,
     prev = prev,
     created = created,
